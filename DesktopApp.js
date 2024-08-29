@@ -18,5 +18,6 @@ app.use('/', route)
 
 // Static routes for access files
 app.use('/public/Profiles/', express.static('./Public/Profiles/'))
+const PORT = process.env.PORT || 3024
 
-app.listen(process.env.PORT, () => console.log(`Server is running on http://localhost:${process.env.PORT}/`))
+app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}/`))
