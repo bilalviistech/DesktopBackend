@@ -5,10 +5,7 @@ dotenv.config()
 const connectDB = async () => {
     try {
         // nuzzle database use
-        await mongoose.connect(process.env.URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        await mongoose.connect(process.env.URI);
         console.log("DB has been connected");
     } catch (err) {
         console.log("DB connection error: ", err.message);
