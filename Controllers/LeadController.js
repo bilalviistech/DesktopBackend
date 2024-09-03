@@ -107,27 +107,47 @@ class LeadController {
 
     // Get All Lead
     static async AllLead(req, res) {
-        try {
-            const role = req.user.role
-            if (role === "Nurse") {
+
+        const role = req.user.role
+        console.log(role)
+        if (role === "Admin") {
+            try {
                 const AllLead = await LeadGeneration.find({})
 
-                res.status(200).json({
+                return res.status(200).json({
                     success: true,
                     data: AllLead
                 })
-            }
-            else {
+            } catch (error) {
                 res.status(200).json({
                     success: false,
-                    message: "You aren't allowed to access all leads."
+                    message: error.message
                 })
             }
-
-        } catch (error) {
+        }
+        else if (role === "Nurse") {
+            try {
+                const AllLead = await LeadGeneration.find({
+                    $or: [{
+                        isInTake: false
+                    }, { isInTake: true, NurseId: req.user._id }]
+                })
+    
+                return res.status(200).json({
+                    success: true,
+                    data: AllLead
+                })
+            } catch (error) {
+                res.status(200).json({
+                    success: false,
+                    message: error.message
+                })
+            }
+        }
+        else {
             res.status(200).json({
                 success: false,
-                message: error.message
+                message: "You aren't allowed to access all leads."
             })
         }
     }
@@ -136,7 +156,15 @@ class LeadController {
     static async AllPendingLead(req, res) {
         try {
             const role = req.user.role
-            if (role === "Nurse") {
+            if (role === "Admin") {
+                const AllPendingLead = await LeadGeneration.find({ status: "Pending" })
+
+                res.status(200).json({
+                    success: true,
+                    data: AllPendingLead
+                })
+            }
+            else if (role === "Nurse") {
                 const AllPendingLead = await LeadGeneration.find({ status: "Pending" })
 
                 res.status(200).json({
@@ -163,8 +191,16 @@ class LeadController {
     static async AllCompletedLead(req, res) {
         try {
             const role = req.user.role
-            if (role === "Nurse") {
+            if (role === "Admin") {
                 const AllCompletedLead = await LeadGeneration.find({ status: "Completed" })
+
+                res.status(200).json({
+                    success: true,
+                    data: AllCompletedLead
+                })
+            }
+            else if (role === "Nurse") {
+                const AllCompletedLead = await LeadGeneration.find({ status: "Completed", NurseId: req.user._id })
 
                 res.status(200).json({
                     success: true,
@@ -203,23 +239,38 @@ class LeadController {
                 allegedNegligence,
                 furtherTreatment,
                 relevantMedicalHx,
-                relevantMedicalHy
+                relevantMedicalHy,
+                isInTake
             } = req.body
 
             const leadId = req.params.id
             const NurseId = req.user._id
+            
+            if (isInTake === false) {
+                await LeadGeneration.findByIdAndUpdate({ _id: leadId }, {
+                    $set: {
+                        NurseId: NurseId,
+                        completedRecord: req.body,
+                        status: "Completed",
+                        isInTake: true
+                    }
+                })
+            }
 
-            await LeadGeneration.findByIdAndUpdate({ _id: leadId }, {
-                $set: {
-                    NurseId: NurseId,
-                    completedRecord: req.body,
-                    status: "Completed"
-                }
-            })
+            else if (isInTake === true) {
+                await LeadGeneration.findByIdAndUpdate({ _id: leadId }, {
+                    $set: {
+                        NurseId: NurseId,
+                        completedRecord: req.body,
+                        status: "Intake",
+                        isInTake: isInTake
+                    }
+                })
+            }
 
             res.status(200).json({
                 success: true,
-                message: "Lead confirmed successfully."
+                message: isInTake ? "Intake has been recorder." : "Lead confirmed successfully."
             })
         } catch (error) {
             res.status(200).json({

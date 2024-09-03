@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node DesktopApp.js"
+    "start": "node DesktopApp.js",
+    "dev": "nodemon DesktopApp.js"
   },
   "keywords": [],
   "author": "",

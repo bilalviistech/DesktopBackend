@@ -50,12 +50,17 @@ const LeadGenerationSchema = new mongoose.Schema({
     status: {
         type: String,
         required: true,
-        enum: ["Pending", "Completed"],
+        enum: ["Pending", "Intake", "Completed"],
         default: "Pending"
     },
     completedRecord: {
         type: Object,
         default: null
+    },
+    isInTake: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 })
 

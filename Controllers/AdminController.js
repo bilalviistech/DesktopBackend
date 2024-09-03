@@ -16,7 +16,7 @@ class AdminController {
             if (existingUser) {
                 res.status(200).json({
                     success: "false",
-                    message: "Email Already Exists."
+                    message: "Email already exists."
                 })
             }
             else {
@@ -36,7 +36,7 @@ class AdminController {
 
                 res.status(200).json({
                     success: "true",
-                    message: "User Created"
+                    message: "User has been registered."
                 })
             }
         } catch (err) {
@@ -78,7 +78,7 @@ class AdminController {
                 else {
                     res.status(200).json({
                         success: false,
-                        message: "Password Doesn't Match"
+                        message: "Password doesn't match."
                     })
                 }
             })
