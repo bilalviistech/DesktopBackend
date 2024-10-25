@@ -25,7 +25,15 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
         enum:["SalesOfficer", "Nurse", "Admin"]
+    },
+    phoneNumber: {
+        type: String,
+    },
+    bio: {
+        type: String,
     }
+}, {
+    timestamps: true // Automatically add createdAt and updatedAt fields
 })
 
 const User = mongoose.model("User", UserSchema)

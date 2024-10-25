@@ -1,6 +1,7 @@
 import express from 'express'
 import route from './Routes/Route.js'
 import dotenv from 'dotenv'
+import cors from 'cors'
 dotenv.config()
 import connectDB from './Config/ConnectDB.js'
 connectDB()
@@ -9,6 +10,7 @@ const app = express()
 
 // Middleware to parse JSON bodies
 app.use(express.json())
+app.use(cors())
 
 // Middleware to parse urlencoded bodies (Form data)
 app.use(express.urlencoded({ extended: true }))

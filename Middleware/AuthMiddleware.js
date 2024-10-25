@@ -13,6 +13,7 @@ var CheckUserAuth = async (req, res, next) => {
             const DecodedToken = jwt.verify(token, process.env.AppToken)
             const id = DecodedToken.id
             req.user = await User.findById(id).select('-password')
+            req.token = token
             next()
         } catch (error) {
             console.log("error")

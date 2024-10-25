@@ -8,7 +8,7 @@ class LeadController {
         try {
             const SaleOfficer = req.user
             if (SaleOfficer.role === "SalesOfficer") {
-                const { firstName, lastName, emailAddress, callerID, primaryPhone, secondaryPhone, address, relation, anySynopsis } = req.body
+                const { firstName, lastName, emailAddress, callerID, primaryPhone, secondaryPhone, address, relation, anySynopsis, timeToReach } = req.body
 
                 const newLeadGeneration = new LeadGeneration({
                     SaleOfficeId: SaleOfficer._id,
@@ -20,7 +20,8 @@ class LeadController {
                     secondaryPhone,
                     address,
                     relation,
-                    anySynopsis
+                    anySynopsis,
+                    timeToReach
                 })
                 await newLeadGeneration.save()
 
@@ -152,6 +153,33 @@ class LeadController {
         }
     }
 
+    static async GetAllNewLead(req, res) {
+        
+        const userData = req.user
+
+        try {
+            if(userData.role === "SalesOfficer"){
+                const AllPendingNewLead = await LeadGeneration.find({ SaleOfficeId: userData._id, status: "Pending" })
+                return res.status(200).json({
+                    success: true,
+                    data: AllPendingNewLead
+                })
+            }
+            else{
+                const AllPendingNewLead = await LeadGeneration.find({ status: "Pending" })
+                return res.status(200).json({
+                    success: true,
+                    data: AllPendingNewLead
+                })
+            }
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                message: error.message
+            })  
+        }
+    }
+
     // Get All Pending Lead
     static async AllPendingLead(req, res) {
         try {
@@ -222,9 +250,36 @@ class LeadController {
         }
     }
 
+    // Get All My Clients
+    static async MyClients(req , res) {
+        const Nurse = req.user
+
+        try {
+            if(Nurse.role !== "Nurse"){
+                return res.status(200).json({
+                    success: true,
+                    message: "You aren't allowed to access the clients."
+                })
+            }
+    
+            const AllMyClients = await LeadGeneration.find({NurseId: Nurse._id, status:"Intake"})
+    
+            res.status(200).json({
+                success: true,
+                data: AllMyClients
+            })
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
+
+    }
+
     // Finalize The Pending Lead
     static async FinalizeLead(req, res) {
-
+       
         try {
             const { relation,
                 nameOfInjured,
@@ -255,22 +310,24 @@ class LeadController {
                         isInTake: true
                     }
                 })
+                console.log(1)
             }
 
             else if (isInTake === true) {
                 await LeadGeneration.findByIdAndUpdate({ _id: leadId }, {
                     $set: {
                         NurseId: NurseId,
-                        completedRecord: req.body,
+                        // completedRecord: req.body,
                         status: "Intake",
                         isInTake: isInTake
                     }
                 })
+                console.log(2)
             }
 
             res.status(200).json({
                 success: true,
-                message: isInTake ? "Intake has been recorder." : "Lead confirmed successfully."
+                message: isInTake ? "Intake has been recorded." : "Lead confirmed successfully."
             })
         } catch (error) {
             res.status(200).json({
@@ -279,6 +336,48 @@ class LeadController {
             })
         }
 
+    }
+
+    // Get All My Intake Reports Lead
+    static async GetAllIntakeReports(req, res){
+        
+        const User = req.user
+        try {
+            if(User.role === "SalesOfficer"){
+
+                const GetAllIntakeReports = await LeadGeneration.find({ SaleOfficeId: User._id})
+            
+                return res.status(200).json({
+                    success: true,
+                    data: GetAllIntakeReports
+                })
+                
+            }
+
+            else if(User.role === "Nurse"){
+                const GetAllIntakeReports = await LeadGeneration.find({ NurseId: User._id, isInTake: true})
+            
+                return res.status(200).json({
+                    success: true,
+                    data: GetAllIntakeReports
+                })
+            }
+
+            else if(User.role === "Admin"){
+                const GetAllIntakeReports = await LeadGeneration.find({})
+            
+                return res.status(200).json({
+                    success: true,
+                    data: GetAllIntakeReports
+                })
+            }
+            
+        } catch (error) {
+            res.status(200).json({
+                success: false,
+                message: error.message
+            })
+        }
     }
 }
 

@@ -61,7 +61,12 @@ const LeadGenerationSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
         default: false
+    },
+    timeToReach: {
+        type: String,
     }
+}, {
+    timestamps: true // Automatically add createdAt and updatedAt fields
 })
 
 const LeadGeneration = mongoose.model('LeadGeneration',LeadGenerationSchema)
